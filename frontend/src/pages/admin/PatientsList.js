@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import MainLayout from '../../components/Layout/MainLayout';
-import { Plus, Search, Edit, Eye } from 'lucide-react';
+import { Plus, Search, Edit, Eye, Trash2 } from 'lucide-react';
 import { Badge } from '../../components/common/Card';
 import api from '../../services/api';
 import { useNavigate } from 'react-router-dom';
 import { GROUPES_SANGUINS } from '../../utils/constants';
+import { toast } from 'sonner';
 
 const PatientsList = () => {
   const [patients, setPatients] = useState([]);
@@ -41,6 +42,17 @@ const PatientsList = () => {
       patient.numero_dossier.toLowerCase().includes(searchLower)
     );
   });
+
+  const deletePatient = async (id, numero) => {
+    if (!window.confirm(`Supprimer définitivement le dossier ${numero} ?`)) return;
+    try {
+      await api.delete(`/patients/${id}`);
+      toast.success('Dossier patient supprimé');
+      loadPatients();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur lors de la suppression');
+    }
+  };
 
   const getGroupeSanguinVariant = (groupe) => {
     if (groupe?.includes('+')) return 'success';
@@ -178,10 +190,17 @@ const PatientsList = () => {
                         </button>
                         <button
                           onClick={() => navigate(`/admin/patients/${patient.id}/edit`)}
-                          className="text-emerald-600 hover:text-emerald-900"
+                          className="text-emerald-600 hover:text-emerald-900 mr-3"
                           data-testid={`edit-patient-${patient.id}`}
                         >
                           <Edit className="w-5 h-5 inline" />
+                        </button>
+                        <button
+                          onClick={() => deletePatient(patient.id, patient.numero_dossier)}
+                          className="text-red-600 hover:text-red-900"
+                          data-testid={`delete-patient-${patient.id}`}
+                        >
+                          <Trash2 className="w-5 h-5 inline" />
                         </button>
                       </td>
                     </tr>

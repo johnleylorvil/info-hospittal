@@ -4,7 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { 
   Home, Users, Calendar, Stethoscope, Pill, 
   DollarSign, Droplet, Building2, Activity,
-  FileText, LogOut, Menu, X
+  FileText, LogOut, Menu, X, User, Tag
 } from 'lucide-react';
 import { ROLES } from '../../utils/constants';
 
@@ -53,6 +53,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         items.push(
           { icon: Home, label: 'Tableau de bord', path: '/pharmacien' },
           { icon: Pill, label: 'Médicaments', path: '/pharmacien/medicaments' },
+          { icon: Tag, label: 'Catégories', path: '/pharmacien/categories' },
           { icon: Activity, label: 'Stocks', path: '/pharmacien/stocks' },
           { icon: FileText, label: 'Prescriptions', path: '/pharmacien/prescriptions' }
         );
@@ -83,6 +84,8 @@ const Sidebar = ({ isOpen, onClose }) => {
   };
 
   const menuItems = getMenuItems();
+
+  const profilePath = '/profile';
 
   return (
     <>
@@ -164,7 +167,19 @@ const Sidebar = ({ isOpen, onClose }) => {
           </nav>
 
           {/* Logout */}
-          <div className="p-4 border-t border-gray-200">
+          <div className="p-4 border-t border-gray-200 space-y-1">
+            <Link
+              to="/profile"
+              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                location.pathname === '/profile'
+                  ? 'bg-gradient-to-r from-sky-600 to-emerald-600 text-white shadow-md'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+              data-testid="nav-profile"
+            >
+              <User className="w-5 h-5" />
+              <span className="font-medium">Mon profil</span>
+            </Link>
             <button
               onClick={logout}
               className="flex items-center space-x-3 px-4 py-3 w-full rounded-lg text-red-600 hover:bg-red-50 transition-colors"

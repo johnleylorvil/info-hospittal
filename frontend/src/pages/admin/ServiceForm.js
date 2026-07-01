@@ -1,14 +1,24 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import MainLayout from '../../components/Layout/MainLayout';
 import { ArrowLeft, Save } from 'lucide-react';
 import api from '../../services/api';
 import { toast } from 'sonner';
 
 const ServiceForm = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
+  const isEdit = !!id;
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ nom: '', description: '', etage: '', nombre_lits: 0 });
+
+  useEffect(() => {
+    if (isEdit) {
+      api.get(`/services/${id}`)
+        .then(res => setForm({ nom: res.data.nom || '', description: res.data.description || '', etage: res.data.etage || '', nombre_lits: res.data.nombre_lits || 0 }))
+        .catch(() => toast.error('Erreur lors du chargement'));
+    }
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -19,8 +29,13 @@ const ServiceForm = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.post('/services/', form);
-      toast.success('Service créé avec succès');
+      if (isEdit) {
+        await api.put(`/services/${id}`, form);
+        toast.success('Service mis à jour');
+      } else {
+        await api.post('/services/', form);
+        toast.success('Service créé avec succès');
+      }
       navigate('/admin/services');
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Une erreur est survenue');
@@ -35,8 +50,8 @@ const ServiceForm = () => {
         <div className="flex items-center space-x-4">
           <button onClick={() => navigate('/admin/services')} className="p-2 hover:bg-gray-100 rounded-lg transition-colors"><ArrowLeft className="w-5 h-5" /></button>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Nouveau service</h2>
-            <p className="text-gray-600 mt-1">Créer un service hospitalier</p>
+            <h2 className="text-2xl font-bold text-gray-900">{isEdit ? 'Modifier le service' : 'Nouveau service'}</h2>
+            <p className="text-gray-600 mt-1">{isEdit ? 'Mettre à jour les informations du service' : 'Créer un service hospitalier'}</p>
           </div>
         </div>
 

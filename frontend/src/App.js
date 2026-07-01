@@ -26,9 +26,11 @@ import FactureForm from './pages/admin/FactureForm';
 // Doctor pages
 import MedecinDashboard from './pages/doctor/MedecinDashboard';
 import MedecinPatientsList from './pages/doctor/MedecinPatientsList';
+import MedecinPatientDetail from './pages/doctor/MedecinPatientDetail';
 import MedecinAppointmentsList from './pages/doctor/MedecinAppointmentsList';
 import MedecinConsultationsList from './pages/doctor/MedecinConsultationsList';
 import MedecinConsultationForm from './pages/doctor/MedecinConsultationForm';
+import MedecinConsultationEdit from './pages/doctor/MedecinConsultationEdit';
 import MedecinPrescriptionsList from './pages/doctor/MedecinPrescriptionsList';
 import MedecinPrescriptionForm from './pages/doctor/MedecinPrescriptionForm';
 
@@ -44,6 +46,7 @@ import PharmacienDashboard from './pages/pharmacist/PharmacienDashboard';
 import PharmacienMedicamentsList from './pages/pharmacist/PharmacienMedicamentsList';
 import PharmacienStocksPage from './pages/pharmacist/PharmacienStocksPage';
 import PharmacienPrescriptionsList from './pages/pharmacist/PharmacienPrescriptionsList';
+import PharmacienCategoriesPage from './pages/pharmacist/PharmacienCategoriesPage';
 
 // Accountant pages
 import ComptableDashboard from './pages/accountant/ComptableDashboard';
@@ -56,6 +59,8 @@ import PatientAppointmentsList from './pages/patient/PatientAppointmentsList';
 import PatientAppointmentForm from './pages/patient/PatientAppointmentForm';
 import PatientConsultationsList from './pages/patient/PatientConsultationsList';
 import PatientFacturesList from './pages/patient/PatientFacturesList';
+
+import ProfilePage from './pages/profile/ProfilePage';
 
 import { ROLES } from './utils/constants';
 
@@ -83,16 +88,21 @@ function App() {
           <Route path="/admin/blood-bank/donneurs/:id/edit" element={<ProtectedRoute allowedRoles={[ROLES.ADMIN]}><DonneurForm /></ProtectedRoute>} />
           <Route path="/admin/services" element={<ProtectedRoute allowedRoles={[ROLES.ADMIN]}><ServicesLitsPage /></ProtectedRoute>} />
           <Route path="/admin/services/new" element={<ProtectedRoute allowedRoles={[ROLES.ADMIN]}><ServiceForm /></ProtectedRoute>} />
+          <Route path="/admin/services/:id/edit" element={<ProtectedRoute allowedRoles={[ROLES.ADMIN]}><ServiceForm /></ProtectedRoute>} />
           <Route path="/admin/services/lits/new" element={<ProtectedRoute allowedRoles={[ROLES.ADMIN]}><LitForm /></ProtectedRoute>} />
+          <Route path="/admin/services/lits/:id/edit" element={<ProtectedRoute allowedRoles={[ROLES.ADMIN]}><LitForm /></ProtectedRoute>} />
           <Route path="/admin/users" element={<ProtectedRoute allowedRoles={[ROLES.ADMIN]}><UsersPage /></ProtectedRoute>} />
           <Route path="/admin/users/new" element={<ProtectedRoute allowedRoles={[ROLES.ADMIN]}><UserForm /></ProtectedRoute>} />
+          <Route path="/admin/users/:id/edit" element={<ProtectedRoute allowedRoles={[ROLES.ADMIN]}><UserForm /></ProtectedRoute>} />
 
           {/* MÉDECIN ROUTES */}
           <Route path="/medecin" element={<ProtectedRoute allowedRoles={[ROLES.MEDECIN]}><MedecinDashboard /></ProtectedRoute>} />
           <Route path="/medecin/patients" element={<ProtectedRoute allowedRoles={[ROLES.MEDECIN]}><MedecinPatientsList /></ProtectedRoute>} />
+          <Route path="/medecin/patients/:id" element={<ProtectedRoute allowedRoles={[ROLES.MEDECIN]}><MedecinPatientDetail /></ProtectedRoute>} />
           <Route path="/medecin/appointments" element={<ProtectedRoute allowedRoles={[ROLES.MEDECIN]}><MedecinAppointmentsList /></ProtectedRoute>} />
           <Route path="/medecin/consultations" element={<ProtectedRoute allowedRoles={[ROLES.MEDECIN]}><MedecinConsultationsList /></ProtectedRoute>} />
           <Route path="/medecin/consultations/new" element={<ProtectedRoute allowedRoles={[ROLES.MEDECIN]}><MedecinConsultationForm /></ProtectedRoute>} />
+          <Route path="/medecin/consultations/:id/edit" element={<ProtectedRoute allowedRoles={[ROLES.MEDECIN]}><MedecinConsultationEdit /></ProtectedRoute>} />
           <Route path="/medecin/prescriptions" element={<ProtectedRoute allowedRoles={[ROLES.MEDECIN]}><MedecinPrescriptionsList /></ProtectedRoute>} />
           <Route path="/medecin/prescriptions/new" element={<ProtectedRoute allowedRoles={[ROLES.MEDECIN]}><MedecinPrescriptionForm /></ProtectedRoute>} />
 
@@ -108,6 +118,7 @@ function App() {
           <Route path="/pharmacien/medicaments" element={<ProtectedRoute allowedRoles={[ROLES.PHARMACIEN]}><PharmacienMedicamentsList /></ProtectedRoute>} />
           <Route path="/pharmacien/stocks" element={<ProtectedRoute allowedRoles={[ROLES.PHARMACIEN]}><PharmacienStocksPage /></ProtectedRoute>} />
           <Route path="/pharmacien/prescriptions" element={<ProtectedRoute allowedRoles={[ROLES.PHARMACIEN]}><PharmacienPrescriptionsList /></ProtectedRoute>} />
+          <Route path="/pharmacien/categories" element={<ProtectedRoute allowedRoles={[ROLES.PHARMACIEN]}><PharmacienCategoriesPage /></ProtectedRoute>} />
 
           {/* COMPTABLE ROUTES */}
           <Route path="/comptable" element={<ProtectedRoute allowedRoles={[ROLES.COMPTABLE]}><ComptableDashboard /></ProtectedRoute>} />
@@ -124,6 +135,7 @@ function App() {
 
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="/profile" element={<ProtectedRoute allowedRoles={[ROLES.ADMIN, ROLES.MEDECIN, ROLES.INFIRMIERE, ROLES.PHARMACIEN, ROLES.COMPTABLE, ROLES.PATIENT]}><ProfilePage /></ProtectedRoute>} />
         </Routes>
         <Toaster position="top-right" richColors />
       </BrowserRouter>

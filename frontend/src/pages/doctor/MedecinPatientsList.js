@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import MainLayout from '../../components/Layout/MainLayout';
-import { Users, User, Calendar } from 'lucide-react';
+import { Users, User, Calendar, Eye } from 'lucide-react';
 import { Badge } from '../../components/common/Card';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const MedecinPatientsList = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -55,7 +57,7 @@ const MedecinPatientsList = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {patients.map((patient) => (
-                <div key={patient.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div key={patient.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate(`/medecin/patients/${patient.id}`)}>
                   <div className="flex items-start space-x-3">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sky-500 to-emerald-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
                       <User className="w-5 h-5" />

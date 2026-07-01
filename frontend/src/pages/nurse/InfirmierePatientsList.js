@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import MainLayout from '../../components/Layout/MainLayout';
-import { Users, Search, User } from 'lucide-react';
+import { Users, Search, User, Plus } from 'lucide-react';
 import { Badge } from '../../components/common/Card';
 import api from '../../services/api';
+import { useNavigate } from 'react-router-dom';
 
 const InfirmierePatientsList = () => {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => { loadPatients(); }, []);
 
@@ -30,9 +32,18 @@ const InfirmierePatientsList = () => {
   return (
     <MainLayout>
       <div className="space-y-6" data-testid="infirmiere-patients-page">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Patients</h2>
-          <p className="text-gray-600 mt-1">Dossiers patients de la clinique</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Patients</h2>
+            <p className="text-gray-600 mt-1">Dossiers patients de la clinique</p>
+          </div>
+          <button
+            onClick={() => navigate('/admin/patients/new')}
+            className="bg-gradient-to-r from-sky-600 to-emerald-600 text-white px-4 py-2 rounded-lg font-medium hover:from-sky-700 hover:to-emerald-700 transition-all flex items-center space-x-2 shadow-lg"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Nouveau patient</span>
+          </button>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">

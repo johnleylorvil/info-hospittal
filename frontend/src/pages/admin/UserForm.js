@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import MainLayout from '../../components/Layout/MainLayout';
 import { ArrowLeft, Save } from 'lucide-react';
 import api from '../../services/api';
@@ -7,7 +7,9 @@ import { ROLES, ROLE_LABELS } from '../../utils/constants';
 import { toast } from 'sonner';
 
 const UserForm = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
+  const isEdit = !!id;
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -20,13 +22,28 @@ const UserForm = () => {
     actif: true
   });
 
+  useEffect(() => {
+    if (isEdit) {
+      api.get(`/users/${id}`)
+        .then(res => setFormData(prev => ({ ...prev, ...res.data, password: '' })))
+        .catch(() => toast.error('Erreur lors du chargement'));
+    }
+  }, [id]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      await api.post('/users', formData);
-      toast.success('Utilisateur créé avec succès');
+      if (isEdit) {
+        const payload = { ...formData };
+        if (!payload.password) delete payload.password;
+        await api.put(`/users/${id}`, payload);
+        toast.success('Utilisateur mis à jour');
+      } else {
+        await api.post('/users', formData);
+        toast.success('Utilisateur créé avec succès');
+      }
       navigate('/admin/users');
     } catch (error) {
       console.error('Erreur:', error);
@@ -55,8 +72,8 @@ const UserForm = () => {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Nouvel utilisateur</h2>
-            <p className="text-gray-600 mt-1">Créer un compte utilisateur</p>
+            <h2 className="text-2xl font-bold text-gray-900">{isEdit ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur'}</h2>
+            <p className="text-gray-600 mt-1">{isEdit ? 'Mettre à jour les informations du compte' : 'Créer un compte utilisateur'}</p>
           </div>
         </div>
 
@@ -99,15 +116,16 @@ const UserForm = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Mot de passe *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{isEdit ? 'Nouveau mot de passe (laisser vide pour ne pas changer)' : 'Mot de passe *'}</label>
               <input
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                required
-                minLength={6}
+                required={!isEdit}
+                minLength={isEdit && !formData.password ? undefined : 6}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                placeholder={isEdit ? 'Laisser vide pour conserver le mot de passe actuel' : ''}
               />
             </div>
 

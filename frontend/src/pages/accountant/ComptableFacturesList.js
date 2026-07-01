@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import MainLayout from '../../components/Layout/MainLayout';
-import { DollarSign, FileText, TrendingUp, FileDown, CheckCircle, Plus } from 'lucide-react';
+import { DollarSign, FileText, TrendingUp, FileDown, CheckCircle, Plus, Edit, X, Save } from 'lucide-react';
 import { Badge } from '../../components/common/Card';
 import api from '../../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +12,8 @@ const ComptableFacturesList = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filterStatut, setFilterStatut] = useState('');
+  const [editId, setEditId] = useState(null);
+  const [editStatut, setEditStatut] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => { loadData(); }, [filterStatut]);
@@ -46,6 +48,17 @@ const ComptableFacturesList = () => {
       loadData();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Erreur lors de l\'encaissement');
+    }
+  };
+
+  const saveStatut = async (id) => {
+    try {
+      await api.put(`/billing/factures/${id}`, { statut: editStatut });
+      toast.success('Statut mis à jour');
+      setEditId(null);
+      loadData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur lors de la mise à jour');
     }
   };
 
@@ -137,14 +150,32 @@ const ComptableFacturesList = () => {
                       <td className="px-6 py-4"><Badge variant={getVariant(f.statut)}>{f.statut}</Badge></td>
                       <td className="px-6 py-4 text-right text-sm">
                         <div className="flex items-center justify-end space-x-3">
-                          {f.statut !== 'payée' && f.statut !== 'annulée' && (
-                            <button onClick={() => encaisser(f)} className="flex items-center space-x-1 text-emerald-600 hover:text-emerald-800" data-testid={`encaisser-${f.id}`}>
-                              <CheckCircle className="w-4 h-4" /><span>Encaisser</span>
-                            </button>
+                          {editId === f.id ? (
+                            <>
+                              <select value={editStatut} onChange={e => setEditStatut(e.target.value)} className="px-2 py-1 border border-gray-300 rounded text-sm">
+                                <option value="en_attente">En attente</option>
+                                <option value="partiellement_payée">Partiellement payée</option>
+                                <option value="payée">Payée</option>
+                                <option value="annulée">Annulée</option>
+                              </select>
+                              <button onClick={() => saveStatut(f.id)} className="flex items-center space-x-1 text-emerald-600 hover:text-emerald-800"><Save className="w-4 h-4" /></button>
+                              <button onClick={() => setEditId(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                            </>
+                          ) : (
+                            <>
+                              <button onClick={() => { setEditId(f.id); setEditStatut(f.statut); }} className="flex items-center space-x-1 text-purple-600 hover:text-purple-800" data-testid={`edit-facture-${f.id}`}>
+                                <Edit className="w-4 h-4" /><span>Statut</span>
+                              </button>
+                              {f.statut !== 'payée' && f.statut !== 'annulée' && (
+                                <button onClick={() => encaisser(f)} className="flex items-center space-x-1 text-emerald-600 hover:text-emerald-800" data-testid={`encaisser-${f.id}`}>
+                                  <CheckCircle className="w-4 h-4" /><span>Encaisser</span>
+                                </button>
+                              )}
+                              <button onClick={() => exportFacturePDF(f)} className="flex items-center space-x-1 text-sky-600 hover:text-sky-800" data-testid={`export-facture-${f.id}`}>
+                                <FileDown className="w-4 h-4" /><span>PDF</span>
+                              </button>
+                            </>
                           )}
-                          <button onClick={() => exportFacturePDF(f)} className="flex items-center space-x-1 text-sky-600 hover:text-sky-800" data-testid={`export-facture-${f.id}`}>
-                            <FileDown className="w-4 h-4" /><span>PDF</span>
-                          </button>
                         </div>
                       </td>
                     </tr>

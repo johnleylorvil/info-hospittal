@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import MainLayout from '../../components/Layout/MainLayout';
 import { ArrowLeft, Save } from 'lucide-react';
 import api from '../../services/api';
 import { toast } from 'sonner';
 
 const LitForm = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
+  const isEdit = !!id;
   const [loading, setLoading] = useState(false);
   const [services, setServices] = useState([]);
   const [form, setForm] = useState({ numero: '', service_id: '', statut: 'disponible', notes: '' });
@@ -14,9 +16,14 @@ const LitForm = () => {
   useEffect(() => {
     api.get('/services').then(res => {
       setServices(res.data);
-      if (res.data.length > 0) setForm(prev => ({ ...prev, service_id: res.data[0].id }));
+      if (!isEdit && res.data.length > 0) setForm(prev => ({ ...prev, service_id: res.data[0].id }));
     }).catch(err => console.error(err));
-  }, []);
+    if (isEdit) {
+      api.get(`/services/lits/${id}`)
+        .then(res => setForm({ numero: res.data.numero || '', service_id: res.data.service_id || '', statut: res.data.statut || 'disponible', notes: res.data.notes || '' }))
+        .catch(() => toast.error('Erreur lors du chargement'));
+    }
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -27,8 +34,13 @@ const LitForm = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.post('/services/lits', form);
-      toast.success('Lit créé avec succès');
+      if (isEdit) {
+        await api.put(`/services/lits/${id}`, form);
+        toast.success('Lit mis à jour');
+      } else {
+        await api.post('/services/lits', form);
+        toast.success('Lit créé avec succès');
+      }
       navigate('/admin/services');
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Une erreur est survenue');
@@ -43,8 +55,8 @@ const LitForm = () => {
         <div className="flex items-center space-x-4">
           <button onClick={() => navigate('/admin/services')} className="p-2 hover:bg-gray-100 rounded-lg transition-colors"><ArrowLeft className="w-5 h-5" /></button>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Nouveau lit</h2>
-            <p className="text-gray-600 mt-1">Ajouter un lit d'hospitalisation</p>
+            <h2 className="text-2xl font-bold text-gray-900">{isEdit ? 'Modifier le lit' : 'Nouveau lit'}</h2>
+            <p className="text-gray-600 mt-1">{isEdit ? 'Mettre à jour les informations du lit' : 'Ajouter un lit d\'hospitalisation'}</p>
           </div>
         </div>
 

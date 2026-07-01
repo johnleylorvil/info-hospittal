@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import MainLayout from '../../components/Layout/MainLayout';
-import { Stethoscope, Plus } from 'lucide-react';
+import { Stethoscope, Plus, Edit } from 'lucide-react';
 import { Badge } from '../../components/common/Card';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -73,6 +73,7 @@ const MedecinConsultationsList = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patient</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Motif</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Diagnostic</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -91,6 +92,11 @@ const MedecinConsultationsList = () => {
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-600">
                           {consultation.diagnostic || '-'}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <button onClick={() => navigate(`/medecin/consultations/${consultation.id}/edit`)} className="flex items-center space-x-1 text-sm text-sky-600 hover:text-sky-800 ml-auto">
+                            <Edit className="w-4 h-4" /><span>Modifier</span>
+                          </button>
                         </td>
                       </tr>
                     );

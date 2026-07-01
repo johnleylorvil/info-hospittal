@@ -54,7 +54,7 @@ const MedecinConsultationForm = () => {
             <label className="block text-sm font-medium text-gray-700 mb-2">Patient *</label>
             <select name="patient_id" value={form.patient_id} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500" data-testid="consultation-patient">
               <option value="">Sélectionner un patient</option>
-              {patients.map(p => <option key={p.id} value={p.id}>{p.numero_dossier}</option>)}
+              {patients.map(p => <option key={p.id} value={p.id}>{p.numero_dossier}{p.sexe ? ` — ${p.sexe}` : ''}{p.groupe_sanguin ? ` (${p.groupe_sanguin})` : ''}</option>)}
             </select>
           </div>
           <div>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import MainLayout from '../../components/Layout/MainLayout';
-import { Users, Plus, UserCheck, UserX } from 'lucide-react';
+import { Users, Plus, UserCheck, UserX, Edit, Trash2 } from 'lucide-react';
 import { Badge } from '../../components/common/Card';
 import api from '../../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -41,6 +41,17 @@ const UsersPage = () => {
       loadUsers();
     } catch (error) {
       toast.error('Erreur lors de la modification');
+    }
+  };
+
+  const deleteUser = async (userId, userName) => {
+    if (!window.confirm(`Supprimer définitivement l'utilisateur ${userName} ?`)) return;
+    try {
+      await api.delete(`/users/${userId}`);
+      toast.success('Utilisateur supprimé');
+      loadUsers();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur lors de la suppression');
     }
   };
 
@@ -165,20 +176,34 @@ const UsersPage = () => {
                         </Badge>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                        <button
-                          onClick={() => toggleUserStatus(user.id, user.actif)}
-                          className={`inline-flex items-center px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                            user.actif
-                              ? 'text-red-700 bg-red-50 hover:bg-red-100'
-                              : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100'
-                          }`}
-                        >
-                          {user.actif ? (
-                            <><UserX className="w-4 h-4 mr-1" /> Désactiver</>
-                          ) : (
-                            <><UserCheck className="w-4 h-4 mr-1" /> Activer</>
-                          )}
-                        </button>
+                        <div className="flex items-center justify-end space-x-2">
+                          <button
+                            onClick={() => navigate(`/admin/users/${user.id}/edit`)}
+                            className="inline-flex items-center px-3 py-1 rounded-lg text-sm font-medium text-sky-700 bg-sky-50 hover:bg-sky-100 transition-colors"
+                          >
+                            <Edit className="w-4 h-4 mr-1" /> Modifier
+                          </button>
+                          <button
+                            onClick={() => toggleUserStatus(user.id, user.actif)}
+                            className={`inline-flex items-center px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                              user.actif
+                                ? 'text-amber-700 bg-amber-50 hover:bg-amber-100'
+                                : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100'
+                            }`}
+                          >
+                            {user.actif ? (
+                              <><UserX className="w-4 h-4 mr-1" /> Désactiver</>
+                            ) : (
+                              <><UserCheck className="w-4 h-4 mr-1" /> Activer</>
+                            )}
+                          </button>
+                          <button
+                            onClick={() => deleteUser(user.id, `${user.prenom} ${user.nom}`)}
+                            className="inline-flex items-center px-3 py-1 rounded-lg text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4 mr-1" /> Supprimer
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

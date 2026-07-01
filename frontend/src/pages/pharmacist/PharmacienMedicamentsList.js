@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import MainLayout from '../../components/Layout/MainLayout';
-import { Pill, Plus, X, Search } from 'lucide-react';
+import { Pill, Plus, X, Search, Edit2, Trash2, Save } from 'lucide-react';
 import { Badge } from '../../components/common/Card';
 import api from '../../services/api';
 import { toast } from 'sonner';
@@ -15,6 +15,9 @@ const PharmacienMedicamentsList = () => {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyMed);
   const [saving, setSaving] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [editForm, setEditForm] = useState(emptyMed);
+  const [savingEdit, setSavingEdit] = useState(false);
 
   useEffect(() => { loadData(); }, []);
 
@@ -52,6 +55,36 @@ const PharmacienMedicamentsList = () => {
       toast.error(error.response?.data?.detail || 'Erreur lors de l\'ajout');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const startEdit = (med) => {
+    setEditId(med.id);
+    setEditForm({ nom: med.nom || '', categorie_id: med.categorie_id || '', forme: med.forme || '', dosage: med.dosage || '', prix_unitaire: med.prix_unitaire || 0, seuil_stock_min: med.seuil_stock_min || 10, fabricant: med.fabricant || '' });
+  };
+
+  const saveEdit = async () => {
+    setSavingEdit(true);
+    try {
+      await api.put(`/pharmacy/medicaments/${editId}`, editForm);
+      toast.success('Médicament mis à jour');
+      setEditId(null);
+      loadData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur lors de la mise à jour');
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const deleteMed = async (id, nom) => {
+    if (!window.confirm(`Supprimer le médicament "${nom}" ?`)) return;
+    try {
+      await api.delete(`/pharmacy/medicaments/${id}`);
+      toast.success('Médicament supprimé');
+      loadData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur lors de la suppression');
     }
   };
 
@@ -108,15 +141,41 @@ const PharmacienMedicamentsList = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filtered.map(med => (
                 <div key={med.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow" data-testid={`med-card-${med.id}`}>
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center space-x-2"><Pill className="w-5 h-5 text-sky-600" /><h3 className="font-semibold text-gray-900">{med.nom}</h3></div>
-                    <Badge variant="info">{med.forme || 'N/A'}</Badge>
-                  </div>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between"><span className="text-gray-600">Dosage :</span><span className="font-medium">{med.dosage || 'N/A'}</span></div>
-                    <div className="flex justify-between"><span className="text-gray-600">Prix :</span><span className="font-medium">{med.prix_unitaire} FCFA</span></div>
-                    <div className="flex justify-between"><span className="text-gray-600">Seuil min :</span><span className="font-medium">{med.seuil_stock_min}</span></div>
-                  </div>
+                  {editId === med.id ? (
+                    <div className="space-y-3">
+                      <input value={editForm.nom} onChange={e => setEditForm(p => ({ ...p, nom: e.target.value }))} placeholder="Nom" className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-sky-500" />
+                      <select value={editForm.categorie_id} onChange={e => setEditForm(p => ({ ...p, categorie_id: e.target.value }))} className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-sky-500">
+                        <option value="">Catégorie</option>
+                        {categories.map(c => <option key={c.id} value={c.id}>{c.nom}</option>)}
+                      </select>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input value={editForm.forme} onChange={e => setEditForm(p => ({ ...p, forme: e.target.value }))} placeholder="Forme" className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-sky-500" />
+                        <input value={editForm.dosage} onChange={e => setEditForm(p => ({ ...p, dosage: e.target.value }))} placeholder="Dosage" className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-sky-500" />
+                        <input type="number" value={editForm.prix_unitaire} onChange={e => setEditForm(p => ({ ...p, prix_unitaire: Number(e.target.value) }))} placeholder="Prix" className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-sky-500" />
+                        <input type="number" value={editForm.seuil_stock_min} onChange={e => setEditForm(p => ({ ...p, seuil_stock_min: Number(e.target.value) }))} placeholder="Seuil min" className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-sky-500" />
+                      </div>
+                      <div className="flex space-x-2 pt-1">
+                        <button onClick={saveEdit} disabled={savingEdit} className="flex items-center space-x-1 text-sm font-medium text-emerald-600 hover:text-emerald-800"><Save className="w-4 h-4" /><span>Sauvegarder</span></button>
+                        <button onClick={() => setEditId(null)} className="text-sm text-gray-500 hover:text-gray-700">Annuler</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center space-x-2"><Pill className="w-5 h-5 text-sky-600" /><h3 className="font-semibold text-gray-900">{med.nom}</h3></div>
+                        <Badge variant="info">{med.forme || 'N/A'}</Badge>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between"><span className="text-gray-600">Dosage :</span><span className="font-medium">{med.dosage || 'N/A'}</span></div>
+                        <div className="flex justify-between"><span className="text-gray-600">Prix :</span><span className="font-medium">{med.prix_unitaire} FCFA</span></div>
+                        <div className="flex justify-between"><span className="text-gray-600">Seuil min :</span><span className="font-medium">{med.seuil_stock_min}</span></div>
+                      </div>
+                      <div className="flex items-center space-x-3 mt-3 pt-3 border-t border-gray-100">
+                        <button onClick={() => startEdit(med)} className="flex items-center space-x-1 text-sm text-sky-600 hover:text-sky-800"><Edit2 className="w-4 h-4" /><span>Modifier</span></button>
+                        <button onClick={() => deleteMed(med.id, med.nom)} className="flex items-center space-x-1 text-sm text-red-600 hover:text-red-800"><Trash2 className="w-4 h-4" /><span>Supprimer</span></button>
+                      </div>
+                    </>
+                  )}
                 </div>
               ))}
             </div>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import MainLayout from '../../components/Layout/MainLayout';
-import { Building2, Plus, Bed } from 'lucide-react';
+import { Building2, Plus, Bed, Edit } from 'lucide-react';
 import { Badge } from '../../components/common/Card';
 import api from '../../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -214,9 +214,14 @@ const ServicesLitsPage = () => {
                               <Bed className="w-5 h-5 text-sky-600" />
                               <h3 className="font-semibold text-gray-900">{lit.numero}</h3>
                             </div>
-                            <Badge variant={getStatutColor(lit.statut)}>
-                              {getStatutLabel(lit.statut)}
-                            </Badge>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant={getStatutColor(lit.statut)}>
+                                {getStatutLabel(lit.statut)}
+                              </Badge>
+                              <button onClick={() => navigate(`/admin/services/lits/${lit.id}/edit`)} className="p-1 text-sky-600 hover:bg-sky-50 rounded" title="Modifier">
+                                <Edit className="w-4 h-4" />
+                              </button>
+                            </div>
                           </div>
                           <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
@@ -256,6 +261,9 @@ const ServicesLitsPage = () => {
                           <p className="text-sm text-gray-600">Étage {service.etage || 'N/A'}</p>
                         </div>
                       </div>
+                      <button onClick={() => navigate(`/admin/services/${service.id}/edit`)} className="p-1.5 text-sky-600 hover:bg-sky-50 rounded-lg" title="Modifier">
+                        <Edit className="w-4 h-4" />
+                      </button>
                     </div>
                     <p className="text-sm text-gray-600 mb-4">{service.description || 'Aucune description'}</p>
                     <div className="flex items-center justify-between text-sm">
